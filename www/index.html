@@ -815,114 +815,256 @@
                             </div>
                         </div>
                         <div class="card-body" data-disable-if="#switch-uart" data-disable-if-condition=":visible">
-                            <div class="form-row mb-3">
-                                <div class="col-8">
-                                    <label class="d-block">UART controller</label>
-                                    <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                        <label class="btn btn-outline-secondary active">
-                                            <input type="radio" name="uart_num" value="0" checked> UART&nbsp;0
-                                        </label>
-                                        <label class="btn btn-outline-secondary">
-                                            <input type="radio" name="uart_num" value="1"> UART&nbsp;1
-                                        </label>
-                                        <label class="btn btn-outline-secondary">
-                                            <input type="radio" name="uart_num" value="2"> UART&nbsp;2
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <label>TX pin</label>
-                                    <input type="number" name="uart_tx_pin" class="form-control" placeholder="1" value="1" required>
-                                </div>
-                                <div class="col">
-                                    <label>RX pin</label>
-                                    <input type="number" name="uart_rx_pin" class="form-control" placeholder="3" value="3" required>
-                                </div>
-                            </div>
-                            <div class="form-row mb-3">
-                                <div class="col-md-4 col-6">
-                                    <label>Baud rate</label>
-                                    <div class="input-group">
-                                        <select name="uart_baud_rate" class="custom-select" required>
-                                            <option value="9600">9600</option>
-                                            <option value="19200">19200</option>
-                                            <option value="38400">38400</option>
-                                            <option value="57600">57600</option>
-                                            <option value="115200" selected>115200</option>
-                                            <option value="230400">230400</option>
-                                            <option value="460800">460800</option>
-                                            <option value="921600">921600</option>
-                                        </select>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text px-2">baud</span>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"></th>
+                                        <th scope="col">UART0</th>
+                                        <th scope="col">UART1</th>
+                                        <th scope="col">UART2</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Baud rate</th>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart0_baud_rate" class="custom-select" required>
+                                                    <option value="9600">9600</option>
+                                                    <option value="19200">19200</option>
+                                                    <option value="38400">38400</option>
+                                                    <option value="57600">57600</option>
+                                                    <option value="115200" selected>115200</option>
+                                                    <option value="230400">230400</option>
+                                                    <option value="460800">460800</option>
+                                                    <option value="921600">921600</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart1_baud_rate" class="custom-select" required>
+                                                    <option value="9600">9600</option>
+                                                    <option value="19200">19200</option>
+                                                    <option value="38400">38400</option>
+                                                    <option value="57600">57600</option>
+                                                    <option value="115200" selected>115200</option>
+                                                    <option value="230400">230400</option>
+                                                    <option value="460800">460800</option>
+                                                    <option value="921600">921600</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart2_baud_rate" class="custom-select" required>
+                                                    <option value="9600">9600</option>
+                                                    <option value="19200">19200</option>
+                                                    <option value="38400">38400</option>
+                                                    <option value="57600">57600</option>
+                                                    <option value="115200" selected>115200</option>
+                                                    <option value="230400">230400</option>
+                                                    <option value="460800">460800</option>
+                                                    <option value="921600">921600</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Data bits</th>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart0_data_bits" class="custom-select" required>
+                                                    <option value="0">5</option>
+                                                    <option value="1">6</option>
+                                                    <option value="2">7</option>
+                                                    <option value="3" selected>8</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart1_data_bits" class="custom-select" required>
+                                                    <option value="0">5</option>
+                                                    <option value="1">6</option>
+                                                    <option value="2">7</option>
+                                                    <option value="3" selected>8</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <select name="uart2_data_bits" class="custom-select" required>
+                                                    <option value="0">5</option>
+                                                    <option value="1">6</option>
+                                                    <option value="2">7</option>
+                                                    <option value="3" selected>8</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Stop bits</th>
+                                        <td>
+                                            <select name="uart0_stop_bits" class="custom-select" required>
+                                                <option value="1" selected>1</option>
+                                                <option value="2">1.5</option>
+                                                <option value="3">2</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="uart1_stop_bits" class="custom-select" required>
+                                                <option value="1" selected>1</option>
+                                                <option value="2">1.5</option>
+                                                <option value="3">2</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="uart2_stop_bits" class="custom-select" required>
+                                                <option value="1" selected>1</option>
+                                                <option value="2">1.5</option>
+                                                <option value="3">2</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Parity</th>
+                                        <td>
+                                            <select name="uart0_parity" class="custom-select px-2" required>
+                                                <option value="0" selected>Disabled</option>
+                                                <option value="2">Even</option>
+                                                <option value="3">Odd</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="uart1_parity" class="custom-select px-2" required>
+                                                <option value="0" selected>Disabled</option>
+                                                <option value="2">Even</option>
+                                                <option value="3">Odd</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="uart2_parity" class="custom-select px-2" required>
+                                                <option value="0" selected>Disabled</option>
+                                                <option value="2">Even</option>
+                                                <option value="3">Odd</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">TX/RX pin</th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart0_tx_pin" class="form-control" placeholder="1" value="1" required>
+                                                <input type="number" name="uart0_rx_pin" class="form-control" placeholder="1" value="1" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart1_tx_pin" class="form-control" placeholder="1" value="1" required>
+                                                <input type="number" name="uart1_rx_pin" class="form-control" placeholder="1" value="1" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart2_tx_pin" class="form-control" placeholder="1" value="1" required>
+                                                <input type="number" name="uart2_rx_pin" class="form-control" placeholder="1" value="1" required>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Flow Control</th>
+                                        <td>
+                                            <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                                                <label class="btn btn-outline-success">
+                                                    <input type="checkbox" value="1" name="uart0_fc_rts"> RTS
+                                                </label>
+                                                <label class="btn btn-outline-primary">
+                                                    <input type="checkbox" value="1" name="uart0_fc_cts"> CTS
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                                                <label class="btn btn-outline-success">
+                                                    <input type="checkbox" value="1" name="uart1_fc_rts"> RTS
+                                                </label>
+                                                <label class="btn btn-outline-primary">
+                                                    <input type="checkbox" value="1" name="uart1_fc_cts"> CTS
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                                                <label class="btn btn-outline-success">
+                                                    <input type="checkbox" value="1" name="uart2_fc_rts"> RTS
+                                                </label>
+                                                <label class="btn btn-outline-primary">
+                                                    <input type="checkbox" value="1" name="uart2_fc_cts"> CTS
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">RTS/CTS pin</th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart0_rts_pin" data-disable-if="input[type='checkbox'][name='uart0_fc_rts']" class="form-control" placeholder="22" value="22" required>
+                                                <input type="number" name="uart0_cts_pin" data-disable-if="input[type='checkbox'][name='uart0_fc_cts']" class="form-control" placeholder="22" value="22" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart1_rts_pin" data-disable-if="input[type='checkbox'][name='uart1_fc_rts']" class="form-control" placeholder="22" value="22" required>
+                                                <input type="number" name="uart1_cts_pin" data-disable-if="input[type='checkbox'][name='uart1_fc_cts']" class="form-control" placeholder="22" value="22" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" name="uart2_rts_pin" data-disable-if="input[type='checkbox'][name='uart2_fc_rts']" class="form-control" placeholder="22" value="22" required>
+                                                <input type="number" name="uart2_cts_pin" data-disable-if="input[type='checkbox'][name='uart2_fc_cts']" class="form-control" placeholder="22" value="22" required>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table">
+                                <tr>
+                                    <th scope="row">Log Port</th>
+                                    <td>
+                                        <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="radio" name="log_uart_num" value="0" checked> UART&nbsp;0
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="radio" name="log_uart_num" value="1"> UART&nbsp;1
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="radio" name="log_uart_num" value="2"> UART&nbsp;2
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="radio" name="log_uart_num" value="-1"> Disabled
+                                            </label>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md col-6">
-                                    <label>Data bits</label>
-                                    <div class="input-group">
-                                        <select name="uart_data_bits" class="custom-select" required>
-                                            <option value="0">5</option>
-                                            <option value="1">6</option>
-                                            <option value="2">7</option>
-                                            <option value="3" selected>8</option>
-                                        </select>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text px-2">bits</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">GNSS Port</th>
+                                    <td>
+                                        <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="radio" name="gnss_uart_num" value="0" checked> UART&nbsp;0
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="radio" name="gnss_uart_num" value="1"> UART&nbsp;1
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="radio" name="gnss_uart_num" value="2"> UART&nbsp;2
+                                            </label>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md col-6">
-                                    <label>Stop bits</label>
-                                    <div class="input-group">
-                                        <select name="uart_stop_bits" class="custom-select" required>
-                                            <option value="1" selected>1</option>
-                                            <option value="2">1.5</option>
-                                            <option value="3">2</option>
-                                        </select>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text px-2">bits</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md col-6">
-                                    <label>Parity</label>
-                                    <select name="uart_parity" class="custom-select px-2" required>
-                                        <option value="0" selected>Disabled</option>
-                                        <option value="2">Even</option>
-                                        <option value="3">Odd</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col-3">
-                                    <label class="d-block">Log forward  <small class="text-muted" data-toggle="tooltip" title="If enabled, log messages (normally sent to UART1, and visible on the /log.html page) are forwarded to the main UART, primarily for debugging purposes. This setting can interfere with normal communication over UART0.">?</small></label>
-                                    <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                        <label class="btn btn-outline-warning">
-                                            <input type="checkbox" value="1" name="uart_log_fwd"> Print
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-5">
-                                    <label class="d-block">Flow control</label>
-                                    <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                        <label class="btn btn-outline-success">
-                                            <input type="checkbox" value="1" name="uart_fc_rts"> RTS
-                                        </label>
-                                        <label class="btn btn-outline-primary">
-                                            <input type="checkbox" value="1" name="uart_fc_cts"> CTS
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <label>RTS pin</label>
-                                    <input type="number" name="uart_rts_pin" data-disable-if="input[type='checkbox'][name='uart_fc_rts']" class="form-control" placeholder="22" value="22" required>
-                                </div>
-                                <div class="col">
-                                    <label>CTS pin</label>
-                                    <input type="number" name="uart_cts_pin" data-disable-if="input[type='checkbox'][name='uart_fc_cts']" class="form-control" placeholder="19" value="19" required>
-                                </div>
-                            </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>

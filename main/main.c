@@ -19,6 +19,7 @@
 #include <log.h>
 #include <status_led.h>
 #include <interface/socket_client.h>
+#include <interface/ubx_client.h>
 #include <esp_sntp.h>
 #include <core_dump.h>
 #include <esp_ota_ops.h>
@@ -121,6 +122,7 @@ void app_main()
     }
 
 
+    ubx_client_init();
     net_init();
     wifi_init();
 

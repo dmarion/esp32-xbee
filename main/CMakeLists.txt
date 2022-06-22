@@ -15,7 +15,9 @@ idf_component_register(SRCS "main.c"
 		"interface/ntrip_server.c"
 		"interface/socket_client.c"
 		"interface/socket_server.c"
+		"interface/ubx_client.c"
 		"protocol/nmea.c"
+		"protocol/ubx.c"
         INCLUDE_DIRS "include")
 
 spiffs_create_partition_image(www ../www FLASH_IN_PROJECT)

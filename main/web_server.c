@@ -33,6 +33,7 @@
 #include <stream_stats.h>
 #include <esp32/rom/crc.h>
 #include <lwip/sockets.h>
+#include <interface/ubx_client.h>
 #include "web_server.h"
 
 // Max length a file path can have on storage
@@ -285,6 +286,82 @@ static esp_err_t heap_info_get_handler(httpd_req_t *req) {
     cJSON_AddNumberToObject(root, "free_blocks", info.free_blocks);
     cJSON_AddNumberToObject(root, "total_blocks", info.total_blocks);
 
+    return json_response(req, root);
+}
+
+static esp_err_t ubx_info_get_handler(httpd_req_t *req) {
+    ubx_mon_ver_data_t *d;
+    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
+
+    cJSON *root = cJSON_CreateObject();
+
+    if (ubx_ctx == 0 || ubx_ctx->msg[UBX_MON_VER] == 0)
+	    goto done;
+
+    d = (ubx_mon_ver_data_t *) ubx_ctx->msg[UBX_MON_VER];
+
+    cJSON_AddStringToObject(root, "mod", ubx_ctx->mod);
+    cJSON_AddStringToObject(root, "swVersion", d->swVersion);
+    cJSON_AddStringToObject(root, "hwVersion", d->hwVersion);
+    cJSON_AddStringToObject(root, "fwVer", ubx_ctx->fwVer);
+    cJSON_AddNumberToObject(root, "protVerMajor", ubx_ctx->protVerMajor);
+    cJSON_AddNumberToObject(root, "protVerMinor", ubx_ctx->protVerMinor);
+
+done:
+    return json_response(req, root);
+}
+
+#define ARRAY_LEN(x)    (sizeof (x)/sizeof (x[0]))
+static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
+{
+    ubx_nav_hpposllh_data_t *hpposllh;
+    ubx_nav_pvt_data_t *pvt;
+    ubx_nav_status_data_t *status;
+
+    const char *fixTypes[] = {
+        [0] = "no fix",
+        [1] = "dead reckoning only",
+        [2] = "2D-fix",
+        [3] = "3D-fix",
+        [4] = "GNSS + dead reckoning",
+        [5] = "time only fix"
+    };
+
+    if (check_auth(req) == ESP_FAIL) {
+        return ESP_FAIL;
+    }
+
+    cJSON *root = cJSON_CreateObject();
+
+    if (ubx_ctx == 0) {
+        goto done;
+    }
+
+    hpposllh = (ubx_nav_hpposllh_data_t *) ubx_ctx->msg[UBX_NAV_HPPOSLLH];
+    pvt = (ubx_nav_pvt_data_t *) ubx_ctx->msg[UBX_NAV_PVT];
+    status = (ubx_nav_status_data_t *) ubx_ctx->msg[UBX_NAV_STATUS];
+
+    if (hpposllh) {
+        cJSON_AddNumberToObject(root, "lat", 1e-9 * ((int64_t) hpposllh->lat * 100 + hpposllh->latHp));
+        cJSON_AddNumberToObject(root, "lon", 1e-9 * ((int64_t) hpposllh->lon * 100 + hpposllh->lonHp));
+        cJSON_AddNumberToObject(root, "alt", 1e-4 * ((uint64_t) hpposllh->hMSL * 10 + hpposllh->hMSLHp));
+        cJSON_AddNumberToObject(root, "hAcc", 1e-4 * hpposllh->hAcc);
+        cJSON_AddNumberToObject(root, "vAcc", 1e-4 * hpposllh->vAcc);
+    }
+
+    if (pvt) {
+        cJSON_AddNumberToObject(root, "nSV", pvt->numSV);
+        cJSON_AddNumberToObject(root, "corrSoln", pvt->carrSoln);
+        cJSON_AddBoolToObject(root, "gnssFixOK", pvt->gnssFixOK);
+        cJSON_AddStringToObject(root, "fixType", pvt->fixType > ARRAY_LEN(fixTypes) ? "unknown" : fixTypes[pvt->fixType]);
+    }
+
+    if (status) {
+        cJSON_AddBoolToObject(root, "diffSoln", status->diffSoln);
+        cJSON_AddBoolToObject(root, "diffCorr", status->diffCorr);
+    }
+
+done:
     return json_response(req, root);
 }
 
@@ -755,6 +832,7 @@ static httpd_handle_t web_server_start(void)
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
+    config.max_uri_handlers = 10;
 
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
@@ -768,6 +846,9 @@ static httpd_handle_t web_server_start(void)
         register_uri_handler(server, "/heap_info", HTTP_GET, heap_info_get_handler);
 
         register_uri_handler(server, "/wifi/scan", HTTP_GET, wifi_scan_get_handler);
+
+        register_uri_handler(server, "/ubx/info", HTTP_GET, ubx_info_get_handler);
+        register_uri_handler(server, "/ubx/pos", HTTP_GET, ubx_pos_get_handler);
 
         register_uri_handler(server, "/*", HTTP_GET, file_get_handler);
     }

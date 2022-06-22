@@ -204,55 +204,144 @@ const config_item_t CONFIG_ITEMS[] = {
                 .def.str = "\n"
         },
 
-        // UART
+        // UART0
         {
-                .key = KEY_CONFIG_UART_NUM,
-                .type = CONFIG_ITEM_TYPE_UINT8,
-                .def.uint8 = UART_NUM_0
+                .key = KEY_CONFIG_UART0_TX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_1
         }, {
-                .key = KEY_CONFIG_UART_TX_PIN,
-                .type = CONFIG_ITEM_TYPE_UINT8,
-                .def.uint8 = GPIO_NUM_1
+                .key = KEY_CONFIG_UART0_RX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_3
         }, {
-                .key = KEY_CONFIG_UART_RX_PIN,
-                .type = CONFIG_ITEM_TYPE_UINT8,
-                .def.uint8 = GPIO_NUM_3
+                .key = KEY_CONFIG_UART0_RTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_14
         }, {
-                .key = KEY_CONFIG_UART_RTS_PIN,
-                .type = CONFIG_ITEM_TYPE_UINT8,
-                .def.uint8 = GPIO_NUM_14
+                .key = KEY_CONFIG_UART0_CTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_33
         }, {
-                .key = KEY_CONFIG_UART_CTS_PIN,
-                .type = CONFIG_ITEM_TYPE_UINT8,
-                .def.uint8 = GPIO_NUM_33
-        }, {
-                .key = KEY_CONFIG_UART_BAUD_RATE,
+                .key = KEY_CONFIG_UART0_BAUD_RATE,
                 .type = CONFIG_ITEM_TYPE_UINT32,
                 .def.uint32 = 115200
         }, {
-                .key = KEY_CONFIG_UART_DATA_BITS,
-                .type = CONFIG_ITEM_TYPE_INT8,
-                .def.int8 = UART_DATA_8_BITS
+                .key = KEY_CONFIG_UART0_DATA_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_DATA_8_BITS
         }, {
-                .key = KEY_CONFIG_UART_STOP_BITS,
-                .type = CONFIG_ITEM_TYPE_INT8,
-                .def.int8 = UART_STOP_BITS_1
+                .key = KEY_CONFIG_UART0_STOP_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_STOP_BITS_1
         }, {
-                .key = KEY_CONFIG_UART_PARITY,
-                .type = CONFIG_ITEM_TYPE_INT8,
-                .def.int8 = UART_PARITY_DISABLE
+                .key = KEY_CONFIG_UART0_PARITY,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_PARITY_DISABLE
         }, {
-                .key = KEY_CONFIG_UART_FLOW_CTRL_RTS,
+                .key = KEY_CONFIG_UART0_FLOW_CTRL_RTS,
                 .type = CONFIG_ITEM_TYPE_BOOL,
                 .def.bool1 = false
         }, {
-                .key = KEY_CONFIG_UART_FLOW_CTRL_CTS,
+                .key = KEY_CONFIG_UART0_FLOW_CTRL_CTS,
+                .type = CONFIG_ITEM_TYPE_BOOL,
+                .def.bool1 = false
+        },
+
+        // UART1
+        {
+                .key = KEY_CONFIG_UART1_TX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_10
+        }, {
+                .key = KEY_CONFIG_UART1_RX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_9
+        }, {
+                .key = KEY_CONFIG_UART1_RTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_11
+        }, {
+                .key = KEY_CONFIG_UART1_CTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_6
+        }, {
+                .key = KEY_CONFIG_UART1_BAUD_RATE,
+                .type = CONFIG_ITEM_TYPE_UINT32,
+                .def.uint32 = 115200
+        }, {
+                .key = KEY_CONFIG_UART1_DATA_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_DATA_8_BITS
+        }, {
+                .key = KEY_CONFIG_UART1_STOP_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_STOP_BITS_1
+        }, {
+                .key = KEY_CONFIG_UART1_PARITY,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_PARITY_DISABLE
+        }, {
+                .key = KEY_CONFIG_UART1_FLOW_CTRL_RTS,
                 .type = CONFIG_ITEM_TYPE_BOOL,
                 .def.bool1 = false
         }, {
-                .key = KEY_CONFIG_UART_LOG_FORWARD,
+                .key = KEY_CONFIG_UART1_FLOW_CTRL_CTS,
                 .type = CONFIG_ITEM_TYPE_BOOL,
                 .def.bool1 = false
+        },
+
+        // UART2
+        {
+                .key = KEY_CONFIG_UART2_TX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_17
+        }, {
+                .key = KEY_CONFIG_UART2_RX_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_16
+        }, {
+                .key = KEY_CONFIG_UART2_RTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_7
+        }, {
+                .key = KEY_CONFIG_UART2_CTS_PIN,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = GPIO_NUM_8
+        }, {
+                .key = KEY_CONFIG_UART2_BAUD_RATE,
+                .type = CONFIG_ITEM_TYPE_UINT32,
+                .def.uint32 = 115200
+        }, {
+                .key = KEY_CONFIG_UART2_DATA_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_DATA_8_BITS
+        }, {
+                .key = KEY_CONFIG_UART2_STOP_BITS,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_STOP_BITS_1
+        }, {
+                .key = KEY_CONFIG_UART2_PARITY,
+                .type = CONFIG_ITEM_TYPE_UINT8,
+                .def.uint8 = UART_PARITY_DISABLE
+        }, {
+                .key = KEY_CONFIG_UART2_FLOW_CTRL_RTS,
+                .type = CONFIG_ITEM_TYPE_BOOL,
+                .def.bool1 = false
+        }, {
+                .key = KEY_CONFIG_UART2_FLOW_CTRL_CTS,
+                .type = CONFIG_ITEM_TYPE_BOOL,
+                .def.bool1 = false
+        },
+
+        // UART Assignment
+        {
+                .key = KEY_CONFIG_LOG_UART_NUM,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = UART_NUM_0,
+        }, {
+                .key = KEY_CONFIG_GNSS_UART_NUM,
+                .type = CONFIG_ITEM_TYPE_INT8,
+                .def.int8 = UART_NUM_0,
         },
 
         // WiFi
@@ -430,6 +519,9 @@ esp_err_t config_set_u64(const char *key, uint64_t value) {
 }
 
 esp_err_t config_set_color(const char *key, config_color_t value) {
+    config_color_t old_value = config_get_color(CONF_ITEM(key));
+    if (value.rgba == old_value.rgba) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from #%08x to #%08x", key, old_value.rgba, value.rgba);
     return nvs_set_u32(config_handle, key, value.rgba);
 }
 
@@ -441,10 +533,43 @@ esp_err_t config_set_bool1(const char *key, bool value) {
 }
 
 esp_err_t config_set_str(const char *key, char *value) {
+    size_t length;
+
+    if (nvs_get_str (config_handle, key, 0, &length) == ESP_OK) {
+	char *old_str = malloc (length);
+	int res;
+
+        nvs_get_str (config_handle, key, old_str, &length);
+	res = strcmp (old_str, value);
+	if (res) {
+	    ESP_LOGI(TAG, "Value '%s' changed from '%s' to '%s'", key, old_str, value);
+	}
+	free (old_str);
+	if (res == 0) return ESP_OK;
+    } else {
+        ESP_LOGI(TAG, "Value '%s' set to '%s'", key, value);
+    }
+
     return nvs_set_str(config_handle, key, value);
 }
 
 esp_err_t config_set_blob(const char *key, char *value, size_t length) {
+    size_t old_len;
+
+    if (nvs_get_blob(config_handle, key, 0, &old_len) == ESP_OK) {
+	if (old_len == length) {
+	    char *old_blob = malloc (old_len);
+	    int is_equal;
+            nvs_get_blob(config_handle, key, old_blob, &old_len);
+	    is_equal = !memcmp(old_blob, value, length);
+	    free (old_blob);
+	    if (is_equal) return ESP_OK;
+	}
+	ESP_LOGI(TAG, "Value '%s' changed", key);
+    } else {
+        ESP_LOGI(TAG, "Value '%s' set", key);
+    }
+
     return nvs_set_blob(config_handle, key, value, length);
 }
 
