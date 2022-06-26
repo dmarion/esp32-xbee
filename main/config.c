@@ -374,34 +374,58 @@ esp_err_t config_set(const config_item_t *item, void *value) {
 }
 
 esp_err_t config_set_i8(const char *key, int8_t value) {
+    int8_t old_value = config_get_i8(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %d to %d", key, old_value, value);
     return nvs_set_i8(config_handle, key, value);
 }
 
 esp_err_t config_set_i16(const char *key, int16_t value) {
+    int16_t old_value = config_get_i16(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %d to %d", key, old_value, value);
     return nvs_set_i16(config_handle, key, value);
 }
 
 esp_err_t config_set_i32(const char *key, int32_t value) {
+    int32_t old_value = config_get_i32(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %d to %d", key, old_value, value);
     return nvs_set_i32(config_handle, key, value);
 }
 
 esp_err_t config_set_i64(const char *key, int64_t value) {
+    int64_t old_value = config_get_i64(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %lld to %lld", key, old_value, value);
     return nvs_set_i64(config_handle, key, value);
 }
 
 esp_err_t config_set_u8(const char *key, uint8_t value) {
+    uint8_t old_value = config_get_u8(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %u to %u", key, old_value, value);
     return nvs_set_u8(config_handle, key, value);
 }
 
 esp_err_t config_set_u16(const char *key, uint16_t value) {
+    uint16_t old_value = config_get_u16(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %u to %u", key, old_value, value);
     return nvs_set_u16(config_handle, key, value);
 }
 
 esp_err_t config_set_u32(const char *key, uint32_t value) {
+    uint32_t old_value = config_get_u32(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %u to %u", key, old_value, value);
     return nvs_set_u32(config_handle, key, value);
 }
 
 esp_err_t config_set_u64(const char *key, uint64_t value) {
+    uint64_t old_value = config_get_u64(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %llu to %llu", key, old_value, value);
     return nvs_set_u64(config_handle, key, value);
 }
 
@@ -410,6 +434,9 @@ esp_err_t config_set_color(const char *key, config_color_t value) {
 }
 
 esp_err_t config_set_bool1(const char *key, bool value) {
+    bool old_value = config_get_i8(CONF_ITEM(key));
+    if (value == old_value) return ESP_OK;
+    ESP_LOGI(TAG, "Value '%s' changed from %d to %d", key, old_value, value);
     return nvs_set_i8(config_handle, key, value);
 }
 
