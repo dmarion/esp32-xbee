@@ -93,9 +93,10 @@ static void ubx_client_task(void *unused)
 
     stream_stats = stream_stats_new("ubx_client");
 
-    for (int i = 0; i < 10 && ctx->protVerMajor == 0; i++) {
+    for (int i = 0; i < 50 && ctx->protVerMajor == 0; i++) {
         if ((i % 3) == 0) {
             ubx_msg_poll (UBX_MON_VER);
+            ESP_LOGI(TAG, "resend UBX_MON_VER");
         }
         vTaskDelay(pdMS_TO_TICKS(50));
     }

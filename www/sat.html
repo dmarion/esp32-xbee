@@ -1,0 +1,146 @@
+<html>
+
+<head>
+    <title>GNSS Satellites and Signals</title>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="bs-4.3.1.bundle.min.js"></script>
+    <link rel="stylesheet" href="bs-4.3.1.min.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <script>
+        const corrSources = [
+            "",
+            "SBAS",
+            "BaiDou",
+            "RTCM2",
+            "RTCM3 OSR",
+            "RTCM SSR",
+            "QZSS SLAS",
+            "SPARTN",
+            "CLAS",
+        ];
+
+        var satUpdate = function () {
+            $.ajax({
+                url: "ubx/sat",
+                dataType: "json",
+                timeout: 2000,
+            })
+                .done(function (data) {
+                    var t = document.getElementById("satAndSigTable");
+                    var nRows = t.rows.length;
+
+                    var newTbody = document.createElement("tbody");
+
+                    data.gnssSystems.forEach((gnssSystem) => {
+                        var gnssRow = newTbody.insertRow();
+                        var svRow = gnssRow;
+
+                        var gnssRowFirst = gnssRow.cells.length;
+                        var c = gnssRow.insertCell();
+                        var gnssRowLast = gnssRow.cells.length;
+                        c.innerHTML = gnssSystem.name;
+
+                        var nSvs = 0;
+                        gnssSystem.svs.forEach((sv) => {
+                            if (nSvs++ > 0) {
+                                for (i = gnssRowFirst; i < gnssRowLast; i++)
+                                    gnssRow.cells[i].rowSpan++;
+                                svRow = newTbody.insertRow();
+                            }
+
+                            var svRowFirst = svRow.cells.length;
+                            svRow.insertCell().innerHTML = gnssSystem.prefix + sv.svId;
+                            svRow.insertCell().innerHTML = sv.elev;
+                            svRow.insertCell().innerHTML = sv.azim;
+                            var svRowLast = svRow.cells.length;
+
+                            //if (sv.svUsed)
+                            svRow.className = "table-sm";
+
+                            if (sv.signals) {
+                                var nSignals = 0;
+                                var sigRow = svRow;
+                                sv.signals.forEach((sig) => {
+                                    if (nSignals++ > 0) {
+                                        for (i = gnssRowFirst; i < gnssRowLast; i++)
+                                            gnssRow.cells[i].rowSpan++;
+                                        for (i = svRowFirst; i < svRowLast; i++)
+                                            svRow.cells[i].rowSpan++;
+                                        sigRow = newTbody.insertRow();
+                                    }
+                                    sigRow.insertCell().innerHTML = sig.sigName;
+                                    var div2 = document.createElement("div");
+                                    var prClass;
+                                    if (sig.qualityInd < 3) prClass = "bg-danger";
+                                    else if (sig.qualityInd < 5) prClass = "bg-warning";
+                                    else prClass = "bg-success";
+
+                                    div2.setAttribute("class", "progress-bar " + prClass);
+                                    div2.setAttribute("role", "progress");
+                                    var x = (sig.qualityInd * 100) / 7;
+                                    div2.setAttribute("style", "width: " + x + "%;");
+                                    div2.setAttribute("aria-valuenow", 4);
+                                    div2.setAttribute("aria-valuemax", 7);
+                                    div2.setAttribute("aria-valuemin", 0);
+                                    var div = document.createElement("div");
+                                    div.setAttribute("class", "progress");
+                                    div.appendChild(div2);
+                                    sigRow.insertCell().appendChild(div);
+                                    sigRow.insertCell().innerHTML = sig.cno;
+                                    var c = sigRow.insertCell();
+                                    c.innerHTML = corrSources[sig.corrSource];
+                                    c.className = "text-nowrap";
+                                });
+                            }
+                        });
+                    });
+                    t.replaceChild(newTbody, t.tBodies[0]);
+                })
+                .always(function () {
+                    setTimeout(satUpdate, 2500);
+                });
+        };
+        satUpdate();
+    </script>
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row mb-1">
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header">GNSS Satellites and Signals</div>
+                    <div class="card-body">
+                        <table class="table table-sm" id="satAndSigTable">
+                            <thead>
+                                <tr>
+                                    <th>GNSS</th>
+                                    <th>SV</th>
+                                    <th>Elevation</th>
+                                    <th>Azimuth</th>
+                                    <th>Signal Type</th>
+                                    <th>Signal Quality</th>
+                                    <th>Signal Strength</th>
+                                    <th>Correction Source</th>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>deg</th>
+                                    <th>deg</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>dBHz</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

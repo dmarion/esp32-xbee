@@ -27,6 +27,7 @@
 #include <freertos/event_groups.h>
 #include <esp_ota_ops.h>
 #include "interface/ntrip.h"
+#include "protocol/rtcm.h"
 #include "config.h"
 #include "util.h"
 #include "uart.h"
@@ -38,6 +39,8 @@ static const char *TAG = "NTRIP_CLIENT";
 #define GPGGA_HEADER "$GPGGA"
 #define GNGGA_HEADER "$GNGGA"
 #define GGA_END "\r\n"
+
+rtcm_ctx_t *ntrip_client_rtcm_ctx = 0;
 
 static const int CASTER_READY_BIT = BIT0;
 
@@ -165,9 +168,11 @@ static void ntrip_client_task(void *ctx) {
 
         // Connected
         xEventGroupSetBits(client_event_group, CASTER_READY_BIT);
+	ntrip_client_rtcm_ctx = rtcm_ctx_alloc();
 
         // Read from socket until disconnected
         while (sock != -1 && (len = read(sock, buffer, BUFFER_SIZE)) >= 0) {
+	    rtcm_parse_data(ntrip_client_rtcm_ctx, (uint8_t *) buffer, len);
             uart_write(buffer, len);
 
             stream_stats_increment(stream_stats, len, 0);
@@ -175,6 +180,8 @@ static void ntrip_client_task(void *ctx) {
 
         // Disconnected
         xEventGroupSetBits(client_event_group, CASTER_READY_BIT);
+	rtcm_ctx_free(ntrip_client_rtcm_ctx);
+	ntrip_client_rtcm_ctx = 0;
 
         // Stop sending GGA to caster
         vTaskDelete(nmea_gga_send_task);

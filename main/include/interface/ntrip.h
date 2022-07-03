@@ -13,6 +13,10 @@
 #define NEWLINE "\r\n"
 #define NEWLINE_LENGTH 2
 
+#include <protocol/rtcm.h>
+
+extern rtcm_ctx_t *ntrip_client_rtcm_ctx;
+
 void ntrip_server_init();
 void ntrip_client_init();
 void ntrip_caster_init();

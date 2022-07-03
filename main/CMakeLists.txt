@@ -17,6 +17,7 @@ idf_component_register(SRCS "main.c"
 		"interface/socket_server.c"
 		"interface/ubx_client.c"
 		"protocol/nmea.c"
+		"protocol/rtcm.c"
 		"protocol/ubx.c"
         INCLUDE_DIRS "include")
 

@@ -33,7 +33,9 @@
 #include <stream_stats.h>
 #include <esp32/rom/crc.h>
 #include <lwip/sockets.h>
+#include <interface/ntrip.h>
 #include <interface/ubx_client.h>
+#include <protocol/rtcm.h>
 #include "web_server.h"
 
 // Max length a file path can have on storage
@@ -42,7 +44,7 @@
 
 #define WWW_PARTITION_PATH "/www"
 #define WWW_PARTITION_LABEL "www"
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 16384
 
 static const char *TAG = "WEB";
 
@@ -289,26 +291,11 @@ static esp_err_t heap_info_get_handler(httpd_req_t *req) {
     return json_response(req, root);
 }
 
+
 static esp_err_t ubx_info_get_handler(httpd_req_t *req) {
-    ubx_mon_ver_data_t *d;
     if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
 
-    cJSON *root = cJSON_CreateObject();
-
-    if (ubx_ctx == 0 || ubx_ctx->msg[UBX_MON_VER] == 0)
-	    goto done;
-
-    d = (ubx_mon_ver_data_t *) ubx_ctx->msg[UBX_MON_VER];
-
-    cJSON_AddStringToObject(root, "mod", ubx_ctx->mod);
-    cJSON_AddStringToObject(root, "swVersion", d->swVersion);
-    cJSON_AddStringToObject(root, "hwVersion", d->hwVersion);
-    cJSON_AddStringToObject(root, "fwVer", ubx_ctx->fwVer);
-    cJSON_AddNumberToObject(root, "protVerMajor", ubx_ctx->protVerMajor);
-    cJSON_AddNumberToObject(root, "protVerMinor", ubx_ctx->protVerMinor);
-
-done:
-    return json_response(req, root);
+    return json_response(req, ubx_json_info_object (ubx_ctx));
 }
 
 #define ARRAY_LEN(x)    (sizeof (x)/sizeof (x[0]))
@@ -344,7 +331,8 @@ static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
     if (hpposllh) {
         cJSON_AddNumberToObject(root, "lat", 1e-9 * ((int64_t) hpposllh->lat * 100 + hpposllh->latHp));
         cJSON_AddNumberToObject(root, "lon", 1e-9 * ((int64_t) hpposllh->lon * 100 + hpposllh->lonHp));
-        cJSON_AddNumberToObject(root, "alt", 1e-4 * ((uint64_t) hpposllh->hMSL * 10 + hpposllh->hMSLHp));
+        cJSON_AddNumberToObject(root, "height", 1e-4 * ((uint64_t) hpposllh->height * 10 + hpposllh->heightHp));
+        cJSON_AddNumberToObject(root, "hMSL", 1e-4 * ((uint64_t) hpposllh->hMSL * 10 + hpposllh->hMSLHp));
         cJSON_AddNumberToObject(root, "hAcc", 1e-4 * hpposllh->hAcc);
         cJSON_AddNumberToObject(root, "vAcc", 1e-4 * hpposllh->vAcc);
     }
@@ -363,6 +351,110 @@ static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
 
 done:
     return json_response(req, root);
+}
+
+static esp_err_t ubx_sat_get_handler(httpd_req_t *req)
+{
+    ubx_nav_sat_data_t *sat;
+    ubx_nav_sig_data_t *sig;
+    char *gnssNames[] = { "GPS", "SBAS", "Galileo", "BeiDou",
+        "IMES", "QZSS", "GLONASS", "NavIC"};
+    char *gnssPrefixes[] = { "G", "S", "E", "B", "I", "Q", "R", "N"};
+
+    if (check_auth(req) == ESP_FAIL) {
+        return ESP_FAIL;
+    }
+
+    cJSON *root = cJSON_CreateObject();
+
+    if (ubx_ctx == 0) {
+        goto done;
+    }
+
+    sat = (ubx_nav_sat_data_t *) ubx_ctx->msg[UBX_NAV_SAT];
+    sig = (ubx_nav_sig_data_t *) ubx_ctx->msg[UBX_NAV_SIG];
+
+    if (sat == 0)
+        goto done;
+
+    cJSON *gnssSystems = cJSON_AddArrayToObject(root, "gnssSystems");
+
+    for (uint8_t gnssId = 0; gnssId <= ARRAY_LEN(gnssNames); gnssId++) {
+        cJSON *gnssSystem = 0;
+        cJSON *svs = 0;
+
+        for (int i = 0; i < sat->numSvs; i++) {
+
+            if (gnssId != sat->sv[i].gnssId)
+                continue;
+
+            cJSON *sv = cJSON_CreateObject();
+
+            if (gnssSystem == 0) {
+                gnssSystem = cJSON_CreateObject();
+                cJSON_AddStringToObject(gnssSystem, "name", gnssNames[gnssId]);
+                cJSON_AddStringToObject(gnssSystem, "prefix", gnssPrefixes[gnssId]);
+                svs = cJSON_AddArrayToObject(gnssSystem, "svs");
+            }
+
+            cJSON_AddNumberToObject(sv, "svId", sat->sv[i].svId);
+            cJSON_AddNumberToObject(sv, "cno", sat->sv[i].cno);
+	    cJSON_AddNumberToObject(sv, "elev", sat->sv[i].elev);
+	    cJSON_AddNumberToObject(sv, "azim", sat->sv[i].azim);
+	    cJSON_AddNumberToObject(sv, "qualityInd", sat->sv[i].qualityInd);
+	    cJSON_AddBoolToObject(sv, "svUsed", sat->sv[i].svUsed);
+	    cJSON_AddBoolToObject(sv, "rtcmCorrUsed", sat->sv[i].rtcmCorrUsed);
+
+	    if (sig) {
+                cJSON *signals = 0;
+		for (int j = 0; j < sig->numSigs; j++) {
+		    ubx_nav_sig_sig_data_t *ss = sig->sig + j;
+
+		    if (ss->gnssId == gnssId && ss->svId == sat->sv[i].svId) {
+			const char *signame = ubx_get_signal_name (gnssId, ss->sigId);
+		        cJSON *s = cJSON_CreateObject();
+			signame = signame ? signame : "unknown";
+		        cJSON_AddNumberToObject(s, "sigId", ss->sigId);
+		        cJSON_AddStringToObject(s, "sigName", signame);
+		        cJSON_AddNumberToObject(s, "cno", ss->cno);
+		        cJSON_AddNumberToObject(s, "qualityInd", ss->qualityInd);
+		        cJSON_AddNumberToObject(s, "corrSource", ss->corrSource);
+		        if (signals == 0)
+			  signals = cJSON_AddArrayToObject(sv, "signals");
+		        cJSON_AddItemToArray(signals, s);
+		    }
+		}
+	    }
+            cJSON_AddItemToArray(svs, sv);
+        }
+        if (gnssSystem)
+            cJSON_AddItemToArray(gnssSystems, gnssSystem);
+    }
+
+done:
+    return json_response(req, root);
+}
+
+
+static esp_err_t nc_mt1005_get_handler(httpd_req_t *req)
+{
+    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
+
+    return json_response(req, rtcm_get_mt1005_json(ntrip_client_rtcm_ctx));
+}
+
+static esp_err_t nc_mt1023_get_handler(httpd_req_t *req)
+{
+    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
+
+    return json_response(req, rtcm_get_mt1023_json(ntrip_client_rtcm_ctx));
+}
+
+static esp_err_t nc_mt1033_get_handler(httpd_req_t *req)
+{
+    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
+
+    return json_response(req, rtcm_get_mt1033_json(ntrip_client_rtcm_ctx));
 }
 
 static esp_err_t file_check_etag_hash(httpd_req_t *req, char *file_hash_path, char *etag, size_t etag_size) {
@@ -832,7 +924,7 @@ static httpd_handle_t web_server_start(void)
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
-    config.max_uri_handlers = 10;
+    config.max_uri_handlers = 16;
 
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
@@ -849,6 +941,10 @@ static httpd_handle_t web_server_start(void)
 
         register_uri_handler(server, "/ubx/info", HTTP_GET, ubx_info_get_handler);
         register_uri_handler(server, "/ubx/pos", HTTP_GET, ubx_pos_get_handler);
+        register_uri_handler(server, "/ubx/sat", HTTP_GET, ubx_sat_get_handler);
+        register_uri_handler(server, "/ntrip_client/mt1005", HTTP_GET, nc_mt1005_get_handler);
+        register_uri_handler(server, "/ntrip_client/mt1023", HTTP_GET, nc_mt1023_get_handler);
+        register_uri_handler(server, "/ntrip_client/mt1033", HTTP_GET, nc_mt1033_get_handler);
 
         register_uri_handler(server, "/*", HTTP_GET, file_get_handler);
     }

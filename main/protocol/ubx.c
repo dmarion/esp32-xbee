@@ -21,8 +21,11 @@
 #include <string.h>
 #include <stdarg.h>
 #include <esp_log.h>
+#include <cJSON.h>
 
 #include "protocol/ubx.h"
+
+#define ARRAY_LEN(x)    (sizeof (x)/sizeof (x[0]))
 
 static const char *TAG = "UBX";
 
@@ -157,3 +160,57 @@ void ubx_ctx_free(ubx_ctx_t *ctx)
         }
     ubx_mem_free(ctx);
 }
+
+const char *ubx_get_signal_name (uint8_t gnssId, uint8_t sigId)
+{
+
+    const char *gpsSignals[]  = { "L1C/A", 0, 0, "L2CL", "L2CL", 0, "L5I", "L5Q" };
+    const char *sbasSignals[]  = { "L1C/A"};
+    const char *galileoSignals[]  = { "E1 C", "E1 B", 0, "E5 aI", "E5 aQ", "E5 bI", "E5 bQ"};
+    const char *baidouSignals[]  = { "B1I D1", "B1I D2", "B2I D1", "B2I D2", 0, "B1C",  0, "B2a" };
+    const char *qzssSignals[]  = { "L1C/A", "L1S", 0, 0, "L2 CM", "L2 CL", 0, 0, "L5 I", "L5 Q" };
+    const char *glonassSignals[]  = { "L1 OF", 0, "L2 OF"};
+    const char *navicSignals[]  = { "L5 A"};
+
+
+    switch (gnssId) {
+    case 0:
+        return ARRAY_LEN(gpsSignals) <= sigId ? 0 : gpsSignals[sigId];
+    case 1:
+        return ARRAY_LEN(sbasSignals) <= sigId ? 0 : sbasSignals[sigId];
+    case 2:
+        return ARRAY_LEN(galileoSignals) <= sigId ? 0 : galileoSignals[sigId];
+    case 3:
+        return ARRAY_LEN(baidouSignals) <= sigId ? 0 : baidouSignals[sigId];
+    case 5:
+        return ARRAY_LEN(qzssSignals) <= sigId ? 0 : qzssSignals[sigId];
+    case 6:
+        return ARRAY_LEN(glonassSignals) <= sigId ? 0 : glonassSignals[sigId];
+    case 7:
+        return ARRAY_LEN(navicSignals) <= sigId ? 0 : navicSignals[sigId];
+    default:
+        return 0;
+    }
+}
+
+cJSON *
+ubx_json_info_object (ubx_ctx_t *ctx)
+{
+    ubx_mon_ver_data_t *d;
+    cJSON *root = cJSON_CreateObject();
+
+    if (ctx == 0 || ctx->msg[UBX_MON_VER] == 0) {
+        return root;
+    }
+
+    d = (ubx_mon_ver_data_t *) ctx->msg[UBX_MON_VER];
+
+    cJSON_AddStringToObject(root, "mod", ctx->mod);
+    cJSON_AddStringToObject(root, "swVersion", d->swVersion);
+    cJSON_AddStringToObject(root, "hwVersion", d->hwVersion);
+    cJSON_AddStringToObject(root, "fwVer", ctx->fwVer);
+    cJSON_AddNumberToObject(root, "protVerMajor", ctx->protVerMajor);
+    cJSON_AddNumberToObject(root, "protVerMinor", ctx->protVerMinor);
+    return root;
+}
+

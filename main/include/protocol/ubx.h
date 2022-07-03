@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <cJSON.h>
 
 #define foreach_ubx_msg \
   _(0x01, 0x03, NAV, STATUS, nav_status) \
@@ -370,5 +371,7 @@ static inline void ubx_msg_calc_checksum (ubx_msg_frame_t *m, ubx_msg_cksum_t *c
 ubx_ctx_t *ubx_ctx_alloc();
 void ubx_ctx_free(ubx_ctx_t *ctx);
 void ubx_parse_data(ubx_ctx_t *ctx, uint8_t *data, uint32_t length);
+const char *ubx_get_signal_name (uint8_t gnssId, uint8_t sigId);
 
+cJSON * ubx_json_info_object (ubx_ctx_t *ctx);
 #endif //ESP32_XBEE_UBX_H
