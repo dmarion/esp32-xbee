@@ -1,0 +1,46 @@
+<html>
+
+<head>
+    <title>JSON Dump</title>
+    <script>
+        const urls = [
+            '/ubx/pos',
+            '/ntrip_client/mt1023',
+            '/ntrip_client/mt1033',
+            '/ntrip_client/mt1005',
+            '/ubx/sat',
+            '/ubx/info',
+            '/wifi/scan',
+            '/config',
+            '/status',
+            '/heap_info'];
+
+
+        async function onload() {
+            const pre = document.createElement("pre");
+            var ddd = {};
+
+            for (const url of urls) {
+                const response = await fetch(url);
+                console.log(response.headers.get("Content-Type"));
+                if (response.ok && response.headers.get("Content-Type") == 'application/json') {
+                    dx = await response.json();
+                    ddd[url] = dx;
+                }
+            }
+            pre.textContent = JSON.stringify(ddd, null, 4);
+            document.body.appendChild(pre);
+
+            var blob = new Blob([JSON.stringify(ddd, null, 4)]);
+            var a = document.createElement('a')
+            a.setAttribute('href', URL.createObjectURL(blob))
+            a.setAttribute('download', "dump.json")
+            a.click()
+        }
+    </script>
+</head>
+
+<body class="bg-light" onload="onload()">
+</body>
+
+</html>
