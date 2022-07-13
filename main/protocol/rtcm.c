@@ -227,6 +227,73 @@ error:
 }
 
 cJSON *
+rtcm_get_mt1021_json(rtcm_ctx_t *ctx)
+{
+    cJSON *a, *o = cJSON_CreateObject();
+    rtcm_msg_parser_t p;
+    char *error = 0;
+    char tmp[32];
+
+    if (ctx == 0) {
+        error = "no data";
+        goto error;
+    }
+
+    rtcm_msg_parser_init (&p, ctx->mt1021);
+    if (rtcm_msg_parser_get_uint12 (&p) != 1021) {
+        error = "no data";
+        goto error;
+    }
+
+    rtcm_msg_parser_get_string(&p, 5, tmp);
+    cJSON_AddStringToObject (o, "sourceName", tmp);
+
+    rtcm_msg_parser_get_string(&p, 5, tmp);
+    cJSON_AddStringToObject (o, "targetName", tmp);
+
+    cJSON_AddNumberToObject(o, "sysIdNum", rtcm_msg_parser_get_uint8(&p));
+
+    rtcm_msg_parser_skip(&p, 10);
+
+    cJSON_AddNumberToObject(o, "plateNum", rtcm_msg_parser_get_uint5(&p));
+    cJSON_AddNumberToObject(o, "compInd", rtcm_msg_parser_get_uint4(&p));
+    cJSON_AddNumberToObject(o, "heightInd", rtcm_msg_parser_get_uint2(&p));
+
+    a = cJSON_AddArrayToObject(o, "areaOfValidityOrigin");
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (2.0 * rtcm_msg_parser_get_int19(&p) / 3600));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (2.0 * rtcm_msg_parser_get_int20(&p) / 3600));
+
+    a = cJSON_AddArrayToObject(o, "areaOfValidityExt");
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (2.0 * rtcm_msg_parser_get_uint14(&p) / 3600));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (2.0 * rtcm_msg_parser_get_uint14(&p) / 3600));
+
+    a = cJSON_AddArrayToObject(o, "translation");
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.001 * rtcm_msg_parser_get_int23(&p)));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.001 * rtcm_msg_parser_get_int23(&p)));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.001 * rtcm_msg_parser_get_int23(&p)));
+
+    a = cJSON_AddArrayToObject(o, "rotation");
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.00002 * rtcm_msg_parser_get_int32(&p) / 3600));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.00002 * rtcm_msg_parser_get_int32(&p) / 3600));
+    cJSON_AddItemToArray(a, cJSON_CreateNumber (0.00002 * rtcm_msg_parser_get_int32(&p) / 3600));
+
+    cJSON_AddNumberToObject(o, "scaleCorr", 0.00001 * rtcm_msg_parser_get_int25(&p));
+
+    cJSON_AddNumberToObject(o, "semiMajorAxisSrc", 0.001 * rtcm_msg_parser_get_uint24(&p));
+    cJSON_AddNumberToObject(o, "semiMinorAxisSrc", 0.001 * rtcm_msg_parser_get_uint25(&p));
+    cJSON_AddNumberToObject(o, "semiMajorAxisTgt", 0.001 * rtcm_msg_parser_get_uint24(&p));
+    cJSON_AddNumberToObject(o, "semiMinorAxisTgt", 0.001 * rtcm_msg_parser_get_uint25(&p));
+
+    cJSON_AddNumberToObject(o, "hHMQualityInd", rtcm_msg_parser_get_uint3(&p));
+    cJSON_AddNumberToObject(o, "vHMQualityInd", rtcm_msg_parser_get_uint3(&p));
+error:
+    if (error) {
+        cJSON_AddStringToObject(o, "error", error);
+    }
+    return o;
+}
+
+cJSON *
 rtcm_get_mt1023_json(rtcm_ctx_t *ctx)
 {
     cJSON *a, *o = cJSON_CreateObject();
@@ -270,13 +337,11 @@ rtcm_get_mt1023_json(rtcm_ctx_t *ctx)
         cJSON_AddItemToArray(a, b);
     }
 
-#if 0
-    _("Horizontal Interpolation Method Indicator", "%u", rtcm_msg_parser_get_uint2(&p));
-    _("Vertical Interpolation Method Indicator", "%u", rtcm_msg_parser_get_uint2(&p));
-    _("Horizontal Grid Quality Indicator", "%u", rtcm_msg_parser_get_uint3(&p));
-    _("Vertical Grid Quality Indicator", "%u", rtcm_msg_parser_get_uint3(&p));
-    _("Modified Julian Day (MJD) Number", "%u", rtcm_msg_parser_get_uint16(&p));
-#endif
+    cJSON_AddNumberToObject(o, "hInterpolationNethod", rtcm_msg_parser_get_uint2(&p));
+    cJSON_AddNumberToObject(o, "vInterpolationNethod", rtcm_msg_parser_get_uint2(&p));
+    cJSON_AddNumberToObject(o, "hGridQualityInd", rtcm_msg_parser_get_uint3(&p));
+    cJSON_AddNumberToObject(o, "vGridQualityInd", rtcm_msg_parser_get_uint3(&p));
+    cJSON_AddNumberToObject(o, "modifiedJulianDayNum", rtcm_msg_parser_get_uint16(&p));
 
 error:
     if (error) {

@@ -24,8 +24,7 @@
                 const response = await fetch(url);
                 console.log(response.headers.get("Content-Type"));
                 if (response.ok && response.headers.get("Content-Type") == 'application/json') {
-                    dx = await response.json();
-                    ddd[url] = dx;
+                    ddd[url] = await response.json();
                 }
             }
             pre.textContent = JSON.stringify(ddd, null, 4);

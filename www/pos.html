@@ -45,10 +45,10 @@
                     }
                     $("#latitude").text(data.lat);
                     $("#longitude").text(data.lon);
-                    $("#height").text(data.height.toFixed(2));
-                    $("#hMSL").text(data.hMSL.toFixed(2));
-                    $("#hAcc").text(data.hAcc.toFixed(2));
-                    $("#vAcc").text(data.vAcc.toFixed(2));
+                    $("#height").text(data.height.toFixed(3));
+                    $("#hMSL").text(data.hMSL.toFixed(3));
+                    $("#hAcc").text(data.hAcc.toFixed(3));
+                    $("#vAcc").text(data.vAcc.toFixed(3));
                     htrs = proj4("EPSG:4326", "EPSG:3765", [data.lon, data.lat]);
                     $("#htrs").text(htrs[0].toFixed(2) + ", " + htrs[1].toFixed(2));
                 })

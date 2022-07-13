@@ -443,6 +443,13 @@ static esp_err_t nc_mt1005_get_handler(httpd_req_t *req)
     return json_response(req, rtcm_get_mt1005_json(ntrip_client_rtcm_ctx));
 }
 
+static esp_err_t nc_mt1021_get_handler(httpd_req_t *req)
+{
+    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
+
+    return json_response(req, rtcm_get_mt1021_json(ntrip_client_rtcm_ctx));
+}
+
 static esp_err_t nc_mt1023_get_handler(httpd_req_t *req)
 {
     if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
@@ -943,6 +950,7 @@ static httpd_handle_t web_server_start(void)
         register_uri_handler(server, "/ubx/pos", HTTP_GET, ubx_pos_get_handler);
         register_uri_handler(server, "/ubx/sat", HTTP_GET, ubx_sat_get_handler);
         register_uri_handler(server, "/ntrip_client/mt1005", HTTP_GET, nc_mt1005_get_handler);
+        register_uri_handler(server, "/ntrip_client/mt1021", HTTP_GET, nc_mt1021_get_handler);
         register_uri_handler(server, "/ntrip_client/mt1023", HTTP_GET, nc_mt1023_get_handler);
         register_uri_handler(server, "/ntrip_client/mt1033", HTTP_GET, nc_mt1033_get_handler);
 
