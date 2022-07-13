@@ -46,6 +46,8 @@ rtcm_msg (rtcm_ctx_t *ctx, uint8_t *data, uint16_t msg_len)
     } else if (msg_num == 1033) {
         memcpy (ctx->mt1033, data, msg_len);
     } else if (msg_num == 1021) {
+        memcpy (ctx->mt1021, data, msg_len);
+#if 0
         rtcm_msg_parser_get_string(&p, 5, buf);
         _("Source-Name", "%s", buf);
         rtcm_msg_parser_get_string(&p, 5, buf);
@@ -83,8 +85,10 @@ rtcm_msg (rtcm_ctx_t *ctx, uint8_t *data, uint16_t msg_len)
 
         _("Horizontal Helmert/Molodenski Quality Indicator", "%u", rtcm_msg_parser_get_uint3 (&p));
         _("Vertical Helmert/Molodenski Quality Indicator", "%u", rtcm_msg_parser_get_uint3 (&p));
+#endif
     } else if (msg_num == 1023) {
         memcpy (ctx->mt1023, data, msg_len);
+#if 0
         _("System Identification Number", "%u", rtcm_msg_parser_get_uint8(&p));
         _("Horizontal Shift Indicator", "%u", rtcm_msg_parser_get_uint1(&p));
         _("Vertical Shift Indicator", "%u", rtcm_msg_parser_get_uint1(&p));
@@ -114,6 +118,7 @@ rtcm_msg (rtcm_ctx_t *ctx, uint8_t *data, uint16_t msg_len)
         _("Horizontal Grid Quality Indicator", "%u", rtcm_msg_parser_get_uint3(&p));
         _("Vertical Grid Quality Indicator", "%u", rtcm_msg_parser_get_uint3(&p));
         _("Modified Julian Day (MJD) Number", "%u", rtcm_msg_parser_get_uint16(&p));
+#endif
     }
 }
 
