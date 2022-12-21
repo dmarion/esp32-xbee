@@ -102,10 +102,13 @@ rtcm_msg_parser_get_string (rtcm_msg_parser_t *p, uint8_t n_bits, char *str)
  */
 
 typedef struct {
+    uint8_t lock;
     /* Message Store */
     char mt1005[19];           /* Stationary RTK Reference Station ARP */
+    char mt1007[36];           /* Antenna Descriptor */
     char mt1021[52 + 31 + 31]; /* Helmert / Abridged Molodenski Transformation Parameters */
     char mt1023[73];           /* Residual Message, Ellipsoidal Grid Representation */
+    char mt1032[20];           /* Physical Reference Station Position Message */
     char mt1033[9 + 5 * 31];   /* Receiver and Antenna Descriptors */
     /* tmp msg buffer */
     uint8_t msg_buf[1024 + 6];
@@ -146,6 +149,22 @@ static inline void rtcm_mem_free(void *p)
     }
 }
 
+static inline void rtcm_ctx_lock(rtcm_ctx_t *ctx)
+{
+  uint8_t free = 0;
+
+  while (__atomic_compare_exchange_n(&ctx->lock, &free, 1, 0, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED) == 0) {
+      while (__atomic_load_n(&ctx->lock, __ATOMIC_RELAXED))
+	  ;
+      free = 0;
+  }
+}
+
+static inline void rtcm_ctx_unlock(rtcm_ctx_t *ctx)
+{
+  __atomic_store_n(&ctx->lock, 0, __ATOMIC_RELEASE);
+}
+
 
 /*
  * Function Declarations
@@ -154,10 +173,6 @@ static inline void rtcm_mem_free(void *p)
 rtcm_ctx_t *rtcm_ctx_alloc();
 void rtcm_ctx_free(rtcm_ctx_t *ctx);
 void rtcm_parse_data(rtcm_ctx_t *ctx, uint8_t *data, uint32_t length);
-cJSON *rtcm_get_mt1005_json(rtcm_ctx_t *ctx);
-cJSON *rtcm_get_mt1021_json(rtcm_ctx_t *ctx);
-cJSON *rtcm_get_mt1023_json(rtcm_ctx_t *ctx);
-cJSON *rtcm_get_mt1033_json(rtcm_ctx_t *ctx);
-cJSON *rtcm_get_mt1033_json(rtcm_ctx_t *ctx);
+cJSON *rtcm_get_json(rtcm_ctx_t *ctx);
 
 #endif //ESP32_XBEE_RTCM_H

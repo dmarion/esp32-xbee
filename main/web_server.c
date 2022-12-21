@@ -301,6 +301,7 @@ static esp_err_t ubx_info_get_handler(httpd_req_t *req) {
 #define ARRAY_LEN(x)    (sizeof (x)/sizeof (x[0]))
 static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
 {
+    ubx_nav_hpposecef_data_t *hpposecef;
     ubx_nav_hpposllh_data_t *hpposllh;
     ubx_nav_pvt_data_t *pvt;
     ubx_nav_status_data_t *status;
@@ -324,11 +325,33 @@ static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
         goto done;
     }
 
-    hpposllh = (ubx_nav_hpposllh_data_t *) ubx_ctx->msg[UBX_NAV_HPPOSLLH];
     pvt = (ubx_nav_pvt_data_t *) ubx_ctx->msg[UBX_NAV_PVT];
-    status = (ubx_nav_status_data_t *) ubx_ctx->msg[UBX_NAV_STATUS];
+    if (pvt == 0) {
+        goto done;
+    }
 
-    if (hpposllh) {
+    cJSON_AddNumberToObject(root, "iTOW", pvt->iTOW);
+    cJSON_AddNumberToObject(root, "nSV", pvt->numSV);
+    cJSON_AddNumberToObject(root, "corrSoln", pvt->carrSoln);
+    cJSON_AddBoolToObject(root, "gnssFixOK", pvt->gnssFixOK);
+    cJSON_AddStringToObject(root, "fixType", pvt->fixType > ARRAY_LEN(fixTypes) ? "unknown" : fixTypes[pvt->fixType]);
+    cJSON_AddNumberToObject(root, "lastCorrectionAge", pvt->lastCorrectionAge);
+
+    hpposecef = (ubx_nav_hpposecef_data_t *) ubx_ctx->msg[UBX_NAV_HPPOSECEF];
+    if (hpposecef && pvt->iTOW == hpposecef->iTOW) {
+        cJSON *a = cJSON_AddArrayToObject(root, "ecef");
+	double v;
+	v = 1e-2 * hpposecef->ecefX + 1e-4 * hpposecef->ecefXHp;
+        cJSON_AddItemToArray(a, cJSON_CreateNumber(v));
+	v = 1e-2 * hpposecef->ecefY + 1e-4 * hpposecef->ecefYHp;
+        cJSON_AddItemToArray(a, cJSON_CreateNumber(v));
+	v = 1e-2 * hpposecef->ecefZ + 1e-4 * hpposecef->ecefZHp;
+        cJSON_AddItemToArray(a, cJSON_CreateNumber(v));
+        cJSON_AddNumberToObject(root, "pAcc", 1e-4 * hpposecef->pAcc);
+    }
+
+    hpposllh = (ubx_nav_hpposllh_data_t *) ubx_ctx->msg[UBX_NAV_HPPOSLLH];
+    if (hpposllh && pvt->iTOW == hpposllh->iTOW) {
         cJSON_AddNumberToObject(root, "lat", 1e-9 * ((int64_t) hpposllh->lat * 100 + hpposllh->latHp));
         cJSON_AddNumberToObject(root, "lon", 1e-9 * ((int64_t) hpposllh->lon * 100 + hpposllh->lonHp));
         cJSON_AddNumberToObject(root, "height", 1e-4 * ((uint64_t) hpposllh->height * 10 + hpposllh->heightHp));
@@ -337,16 +360,12 @@ static esp_err_t ubx_pos_get_handler(httpd_req_t *req)
         cJSON_AddNumberToObject(root, "vAcc", 1e-4 * hpposllh->vAcc);
     }
 
-    if (pvt) {
-        cJSON_AddNumberToObject(root, "nSV", pvt->numSV);
-        cJSON_AddNumberToObject(root, "corrSoln", pvt->carrSoln);
-        cJSON_AddBoolToObject(root, "gnssFixOK", pvt->gnssFixOK);
-        cJSON_AddStringToObject(root, "fixType", pvt->fixType > ARRAY_LEN(fixTypes) ? "unknown" : fixTypes[pvt->fixType]);
-    }
-
-    if (status) {
+    status = (ubx_nav_status_data_t *) ubx_ctx->msg[UBX_NAV_STATUS];
+    if (status && pvt->iTOW == status->iTOW) {
         cJSON_AddBoolToObject(root, "diffSoln", status->diffSoln);
         cJSON_AddBoolToObject(root, "diffCorr", status->diffCorr);
+        cJSON_AddNumberToObject(root, "ttff", 1e-3 * status->ttff);
+        cJSON_AddNumberToObject(root, "sss", 1e-3 * status->msss);
     }
 
 done:
@@ -436,32 +455,11 @@ done:
 }
 
 
-static esp_err_t nc_mt1005_get_handler(httpd_req_t *req)
+static esp_err_t ntrip_client_get_handler(httpd_req_t *req)
 {
     if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
 
-    return json_response(req, rtcm_get_mt1005_json(ntrip_client_rtcm_ctx));
-}
-
-static esp_err_t nc_mt1021_get_handler(httpd_req_t *req)
-{
-    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
-
-    return json_response(req, rtcm_get_mt1021_json(ntrip_client_rtcm_ctx));
-}
-
-static esp_err_t nc_mt1023_get_handler(httpd_req_t *req)
-{
-    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
-
-    return json_response(req, rtcm_get_mt1023_json(ntrip_client_rtcm_ctx));
-}
-
-static esp_err_t nc_mt1033_get_handler(httpd_req_t *req)
-{
-    if (check_auth(req) == ESP_FAIL) return ESP_FAIL;
-
-    return json_response(req, rtcm_get_mt1033_json(ntrip_client_rtcm_ctx));
+    return json_response(req, rtcm_get_json(ntrip_client_rtcm_ctx));
 }
 
 static esp_err_t file_check_etag_hash(httpd_req_t *req, char *file_hash_path, char *etag, size_t etag_size) {
@@ -949,10 +947,7 @@ static httpd_handle_t web_server_start(void)
         register_uri_handler(server, "/ubx/info", HTTP_GET, ubx_info_get_handler);
         register_uri_handler(server, "/ubx/pos", HTTP_GET, ubx_pos_get_handler);
         register_uri_handler(server, "/ubx/sat", HTTP_GET, ubx_sat_get_handler);
-        register_uri_handler(server, "/ntrip_client/mt1005", HTTP_GET, nc_mt1005_get_handler);
-        register_uri_handler(server, "/ntrip_client/mt1021", HTTP_GET, nc_mt1021_get_handler);
-        register_uri_handler(server, "/ntrip_client/mt1023", HTTP_GET, nc_mt1023_get_handler);
-        register_uri_handler(server, "/ntrip_client/mt1033", HTTP_GET, nc_mt1033_get_handler);
+        register_uri_handler(server, "/ntrip_client", HTTP_GET, ntrip_client_get_handler);
 
         register_uri_handler(server, "/*", HTTP_GET, file_get_handler);
     }

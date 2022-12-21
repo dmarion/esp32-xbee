@@ -113,6 +113,7 @@ static void ubx_client_task(void *unused)
     ubx_cfg_msg(UBX_NAV_PVT, 1);
     ubx_cfg_msg(UBX_NAV_STATUS, 1);
     ubx_cfg_msg(UBX_NAV_HPPOSLLH, 1);
+    ubx_cfg_msg(UBX_NAV_HPPOSECEF, 1);
 
     ubx_ctx = ctx;
 

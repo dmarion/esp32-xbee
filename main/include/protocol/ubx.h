@@ -9,6 +9,7 @@
 #define foreach_ubx_msg \
   _(0x01, 0x03, NAV, STATUS, nav_status) \
   _(0x01, 0x07, NAV, PVT, nav_pvt) \
+  _(0x01, 0x13, NAV, HPPOSECEF, nav_hpposecef) \
   _(0x01, 0x14, NAV, HPPOSLLH, nav_hpposllh) \
   _(0x01, 0x35, NAV, SAT, nav_sat) \
   _(0x01, 0x43, NAV, SIG, nav_sig) \
@@ -228,7 +229,7 @@ typedef struct {
         uint16_t flags3;
         struct {
             uint16_t invalidLlh : 1;
-            uint16_t lastCorrectonAge: 4;
+            uint16_t lastCorrectionAge: 4;
         };
     };
     uint8_t reserved0[4];
@@ -238,6 +239,27 @@ typedef struct {
 } ubx_nav_pvt_data_t;
 
 STATIC_ASSERT_SIZEOF(ubx_nav_pvt_data_t, 92);
+
+typedef struct {
+    uint8_t version;
+    uint8_t reserved0[3];
+    uint32_t iTOW;
+    int32_t ecefX;
+    int32_t ecefY;
+    int32_t ecefZ;
+    int8_t ecefXHp;
+    int8_t ecefYHp;
+    int8_t ecefZHp;
+    union {
+        uint8_t flags;
+        struct {
+            uint8_t invalidEcef : 1;
+        };
+    };
+    uint32_t pAcc;
+} __attribute__ ((packed)) ubx_nav_hpposecef_data_t;
+
+STATIC_ASSERT_SIZEOF (ubx_nav_hpposecef_data_t, 28);
 
 typedef struct {
     uint8_t version;

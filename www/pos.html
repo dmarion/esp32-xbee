@@ -49,8 +49,10 @@
                     $("#hMSL").text(data.hMSL.toFixed(3));
                     $("#hAcc").text(data.hAcc.toFixed(3));
                     $("#vAcc").text(data.vAcc.toFixed(3));
+                    $("#ttff").text(data.ttff.toFixed(3));
+                    $("#sss").text(data.sss.toFixed(3));
                     htrs = proj4("EPSG:4326", "EPSG:3765", [data.lon, data.lat]);
-                    $("#htrs").text(htrs[0].toFixed(2) + ", " + htrs[1].toFixed(2));
+                    $("#htrs").text(htrs[0].toFixed(3) + ", " + htrs[1].toFixed(2));
                 })
                 .always(function () {
                     setTimeout(posUpdate, 2500);
@@ -105,6 +107,16 @@
                                 <tr>
                                     <th scope="row">Vertical Accuracy</th>
                                     <td id="vAcc">n/a</td>
+                                    <td>m</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Time to first fix</th>
+                                    <td id="ttff">n/a</td>
+                                    <td>m</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Seconds Since Startup</th>
+                                    <td id="sss">n/a</td>
                                     <td>m</td>
                                 </tr>
                                 <tr>
