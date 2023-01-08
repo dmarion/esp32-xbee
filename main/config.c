@@ -21,6 +21,7 @@
 #include <string.h>
 #include <driver/uart.h>
 #include <esp_wifi_types.h>
+#include <esp_netif_ip_addr.h>
 #include <driver/gpio.h>
 #include <uart.h>
 #include <tasks.h>
@@ -479,7 +480,7 @@ esp_err_t config_set_i16(const char *key, int16_t value) {
 esp_err_t config_set_i32(const char *key, int32_t value) {
     int32_t old_value = config_get_i32(CONF_ITEM(key));
     if (value == old_value) return ESP_OK;
-    ESP_LOGI(TAG, "Value '%s' changed from %d to %d", key, old_value, value);
+    ESP_LOGI(TAG, "Value '%s' changed from %ld to %ld", key, old_value, value);
     return nvs_set_i32(config_handle, key, value);
 }
 
@@ -507,7 +508,7 @@ esp_err_t config_set_u16(const char *key, uint16_t value) {
 esp_err_t config_set_u32(const char *key, uint32_t value) {
     uint32_t old_value = config_get_u32(CONF_ITEM(key));
     if (value == old_value) return ESP_OK;
-    ESP_LOGI(TAG, "Value '%s' changed from %u to %u", key, old_value, value);
+    ESP_LOGI(TAG, "Value '%s' changed from %lu to %lu", key, old_value, value);
     return nvs_set_u32(config_handle, key, value);
 }
 
@@ -521,7 +522,7 @@ esp_err_t config_set_u64(const char *key, uint64_t value) {
 esp_err_t config_set_color(const char *key, config_color_t value) {
     config_color_t old_value = config_get_color(CONF_ITEM(key));
     if (value.rgba == old_value.rgba) return ESP_OK;
-    ESP_LOGI(TAG, "Value '%s' changed from #%08x to #%08x", key, old_value.rgba, value.rgba);
+    ESP_LOGI(TAG, "Value '%s' changed from #%08lx to #%08lx", key, old_value.rgba, value.rgba);
     return nvs_set_u32(config_handle, key, value.rgba);
 }
 
