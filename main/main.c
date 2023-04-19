@@ -19,6 +19,7 @@
 #include <log.h>
 #include <status_led.h>
 #include <interface/socket_client.h>
+#include <interface/ubx_client.h>
 #include <esp_sntp.h>
 #include <core_dump.h>
 #include <esp_ota_ops.h>
@@ -33,6 +34,7 @@
 
 #include "config.h"
 #include "wifi.h"
+#include "mdns.h"
 #include "interface/socket_server.h"
 #include "uart.h"
 #include "interface/ntrip.h"
@@ -121,7 +123,11 @@ void app_main()
     }
 
 
+    ubx_client_init();
     net_init();
+    mdns_init();
+    mdns_hostname_set("esp32xbee");
+    mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0);
     wifi_init();
 
     web_server_init();

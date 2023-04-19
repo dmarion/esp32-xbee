@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+import socket
+import http.server
+import socketserver
+import urllib.request
+
+class Server(http.server.SimpleHTTPRequestHandler):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory="www/", **kwargs)
+
+    def do_GET(self):
+        if self.path.endswith('pos'):
+           self.send_response(200)
+           self.send_header('Content-type', 'application/json')
+           self.end_headers()
+           self.addr = socket.gethostbyname('esp32xbee.local')
+           print("esp32xbee address is {}".format(self.addr))
+           contents = urllib.request.urlopen("http://{}/ubx/pos".format(self.addr)).read()
+           self.wfile.write(contents)
+        else:
+           return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+    def serve_forever(port):
+        socketserver.TCPServer(('', port), Server).serve_forever()
+
+
+if __name__ == "__main__":
+    Server.serve_forever(8080)
+

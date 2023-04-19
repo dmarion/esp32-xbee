@@ -1,0 +1,19 @@
+{
+  "name": "map",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "beautify": "js-beautify -b collapse,preserve-inline -n -r -f *.js *.html *.css"
+  },
+  "devDependencies": {
+    "js-beautify": "^1.14.7",
+    "vite": "^4.0.4",
+    "vite-plugin-compression": "^0.5.1"
+  },
+  "dependencies": {
+    "ol": "latest",
+    "proj4": "latest"
+  }
+}
